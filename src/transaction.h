@@ -21,9 +21,9 @@ public:
         this->owner = owner;
     }
 
-    string getprev_tx_id() { return prev_tx_id; }
-    int getoutput_index() { return output_index; }
-    string getowner() { return owner; }
+    string getprev_tx_id() const { return prev_tx_id; }
+    int getoutput_index() const { return output_index; }
+    string getowner() const { return owner; }
 };
 
 class tx_output
@@ -33,14 +33,14 @@ private:
     string receiver;
 
 public:
-    tx_output(double &amount, string &receiver)
+    tx_output(double amount, const string &receiver)
     {
         this->amount = amount;
         this->receiver = receiver;
     }
 
-    int getamount() { return amount; }
-    string getreceiver() { return receiver; }
+    double getamount() const { return amount; }
+    string getreceiver() const { return receiver; }
 };
 
 class transaction
@@ -58,9 +58,9 @@ public:
         this->outputs = outputs;
     }
 
-    string gettx_id() { return tx_id; }
-    vector<tx_input> getinputs() { return inputs; }
-    vector<tx_output> getoutputs() { return outputs; }
+    string gettx_id() const { return tx_id; }
+    vector<tx_input> getinputs() const { return inputs; }
+    vector<tx_output> getoutputs() const { return outputs; }
 };
 
 #endif // TRANSACTION_H
