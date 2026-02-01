@@ -2,7 +2,6 @@
 #define MEMPOOL_H
 
 #include "transaction.h"
-#include "validator.h"
 #include "utxo_manager.h"
 #include <vector>
 #include <string>
@@ -11,6 +10,8 @@
 #include <algorithm>
 
 using namespace std;
+
+class validator; // Forward declaration
 
 class mempool
 {
@@ -22,36 +23,17 @@ private:
 public:
     mempool(int size = 50) : max_size(size) {}
 
-    pair<bool, string> add_transaction(transaction tx, utxo_manager &um)
+    bool is_spent(const utxo_key &key) const
     {
-        if (transactions.size() >= (size_t)max_size)
-        {
-            return {false, "Mempool is full"};
-        }
-
-        string error_message;
-        if (!validator::validate(tx, um, error_message))
-        {
-            return {false, error_message};
-        }
-
-        for (auto const &in : tx.inputs)
-        {
-            utxo_key key(in.prev_tx_id, in.index);
-            if (spent_utxos.find(key) != spent_utxos.end())
-            {
-                return {false, "UTXO already spent in mempool"};
-            }
-        }
-
-        transactions.push(make_pair(tx.fee, tx));
-        for (auto const &in : tx.inputs)
-        {
-            spent_utxos.insert(utxo_key(in.prev_tx_id, in.index));
-        }
-
-        return {true, "Transaction added to mempool"};
+        return spent_utxos.find(key) != spent_utxos.end();
     }
+
+    bool is_full() const
+    {
+        return transactions.size() >= (size_t)max_size;
+    }
+
+    pair<bool, string> add_transaction(transaction tx, utxo_manager &um);
 
     vector<transaction> mine_top_transactions(int n)
     {
@@ -88,5 +70,26 @@ public:
         spent_utxos.clear();
     }
 };
+
+#include "validator.h"
+
+pair<bool, string> mempool::add_transaction(transaction tx, utxo_manager &um)
+{
+    string error_message;
+    double calculated_fee = 0;
+    if (!validator::validate_transaction(tx, um, *this, error_message, calculated_fee))
+    {
+        return {false, error_message};
+    }
+    tx.fee = calculated_fee;
+
+    transactions.push(make_pair(tx.fee, tx));
+    for (auto const &in : tx.inputs)
+    {
+        spent_utxos.insert(utxo_key(in.prev_tx_id, in.index));
+    }
+
+    return {true, "Transaction added to mempool"};
+}
 
 #endif

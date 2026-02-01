@@ -13,12 +13,16 @@ public:
     string tx_id;
     int index;
 
-    utxo_key(string id = "", int idx = 0) : tx_id(id), index(idx) {}
+    utxo_key(string id = "", int idx = 0) {
+        this->tx_id = id;
+        this->index = idx;
+    }
 
     bool operator<(const utxo_key &other) const
     {
-        if (tx_id != other.tx_id)
+        if (tx_id != other.tx_id){
             return tx_id < other.tx_id;
+        }
         return index < other.index;
     }
 };
@@ -29,7 +33,10 @@ public:
     double amount;
     string owner;
 
-    utxo_value(double amt = 0.0, string own = "") : amount(amt), owner(own) {}
+    utxo_value(double amt = 0.0, string own = ""){
+        this->amount = amt;
+        this->owner = own;
+    }
 };
 
 class utxo_manager
@@ -56,16 +63,18 @@ public:
     double get_amount(string tx_id, int index)
     {
         auto it = utxo_set.find(utxo_key(tx_id, index));
-        if (it != utxo_set.end())
+        if (it != utxo_set.end()){
             return it->second.amount;
+        }
         return 0;
     }
 
     string get_owner(string tx_id, int index)
     {
         auto it = utxo_set.find(utxo_key(tx_id, index));
-        if (it != utxo_set.end())
+        if (it != utxo_set.end()){
             return it->second.owner;
+        }
         return "";
     }
 
@@ -74,8 +83,9 @@ public:
         double balance = 0;
         for (auto const &[key, val] : utxo_set)
         {
-            if (val.owner == owner)
+            if (val.owner == owner){
                 balance += val.amount;
+            }
         }
         return balance;
     }
@@ -85,5 +95,7 @@ public:
         return utxo_set;
     }
 };
+
+using UTXOManager = utxo_manager;
 
 #endif
