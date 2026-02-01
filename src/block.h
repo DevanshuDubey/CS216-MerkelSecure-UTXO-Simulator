@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "transaction.h"
+#include "blockchain.h"
 
 using namespace std;
 
@@ -15,8 +16,8 @@ private:
     vector<transaction> transactions; 
 
 public:
-    block(block* prev, string miner, double fees, vector<transaction> txs) {
-        prevBlock = prev;
+    block(string miner, double fees, vector<transaction> txs, Blockchain& blockchain) {
+        prevBlock = blockchain.get_latest_block();
         miner_address = miner;
         total_fees = fees;
         transactions = txs;
