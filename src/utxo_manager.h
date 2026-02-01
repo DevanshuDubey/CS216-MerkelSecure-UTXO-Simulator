@@ -3,55 +3,86 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
-// Structure to uniquely identify a UTXO
-struct UTXOKey {
-    std::string tx_id;
+using namespace std;
+
+class utxo_key
+{
+public:
+    string tx_id;
     int index;
 
-    bool operator<(const UTXOKey& other) const {
+    utxo_key(string id = "", int idx = 0) : tx_id(id), index(idx) {}
+
+    bool operator<(const utxo_key &other) const
+    {
         if (tx_id != other.tx_id)
             return tx_id < other.tx_id;
         return index < other.index;
     }
 };
 
-// Structure to store UTXO data
-struct UTXOValue {
+class utxo_value
+{
+public:
     double amount;
-    std::string owner;
+    string owner;
+
+    utxo_value(double amt = 0.0, string own = "") : amount(amt), owner(own) {}
 };
 
-class UTXOManager {
+class utxo_manager
+{
 private:
-    std::map<UTXOKey, UTXOValue> utxo_set;
+    map<utxo_key, utxo_value> utxo_set;
 
 public:
-    void addUTXO(const std::string &tx_id, int index, double amount,
-                 const std::string &owner) {
-        utxo_set[{tx_id, index}] = {amount, owner};
+    void add_utxo(string tx_id, int index, double amount, string owner)
+    {
+        utxo_set[utxo_key(tx_id, index)] = utxo_value(amount, owner);
     }
 
-    void removeUTXO(const std::string &tx_id, int index) {
-        utxo_set.erase({tx_id, index});
+    void remove_utxo(string tx_id, int index)
+    {
+        utxo_set.erase(utxo_key(tx_id, index));
     }
 
-    bool exists(const std::string &tx_id, int index) const {
-        return utxo_set.find({tx_id, index}) != utxo_set.end();
+    bool exists(string tx_id, int index)
+    {
+        return utxo_set.find(utxo_key(tx_id, index)) != utxo_set.end();
     }
 
-    double getAmount(const std::string &tx_id, int index) const {
-        auto it = utxo_set.find({tx_id, index});
-        return (it != utxo_set.end()) ? it->second.amount : 0.0;
+    double get_amount(string tx_id, int index)
+    {
+        auto it = utxo_set.find(utxo_key(tx_id, index));
+        if (it != utxo_set.end())
+            return it->second.amount;
+        return 0;
     }
 
-    double getBalance(const std::string &owner) const {
-        double total = 0.0;
-        for (const auto &p : utxo_set) {
-            if (p.second.owner == owner)
-                total += p.second.amount;
+    string get_owner(string tx_id, int index)
+    {
+        auto it = utxo_set.find(utxo_key(tx_id, index));
+        if (it != utxo_set.end())
+            return it->second.owner;
+        return "";
+    }
+
+    double get_balance(string owner)
+    {
+        double balance = 0;
+        for (auto const &[key, val] : utxo_set)
+        {
+            if (val.owner == owner)
+                balance += val.amount;
         }
-        return total;
+        return balance;
+    }
+
+    map<utxo_key, utxo_value> get_utxo_set()
+    {
+        return utxo_set;
     }
 };
 

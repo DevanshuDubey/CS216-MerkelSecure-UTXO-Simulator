@@ -25,24 +25,29 @@ public:
     tx_output(double amt = 0.0, string rec = "") : amount(amt), recipient(rec) {}
 };
 
-class transac
+class transaction
 {
 public:
     string tx_id;
-    vector<tx_input> tx_inputs;
+    vector<tx_input> inputs;
     vector<tx_output> outputs;
     double fee;
 
-    Transaction(string id = "") : tx_id(id), fee(0.0) {}
+    transaction(string id = "") : tx_id(id), fee(0.0) {}
 
-    void add_tx_input(string prev_tx_id, int index, string owner)
+    void add_input(string prev_tx_id, int index, string owner)
     {
-        tx_inputs.push_back(tx_input(prev_tx_id, index, owner));
+        inputs.push_back(tx_input(prev_tx_id, index, owner));
     }
 
     void add_output(double amount, string recipient)
     {
         outputs.push_back(tx_output(amount, recipient));
+    }
+
+    bool operator<(const transaction &other) const
+    {
+        return tx_id < other.tx_id;
     }
 };
 
