@@ -8,59 +8,42 @@ using namespace std;
 
 class tx_input
 {
-private:
+public:
     string prev_tx_id;
-    int output_index;
+    int index;
     string owner;
 
-public:
-    tx_input(string prev_tx_id, int output_index, string owner)
-    {
-        this->prev_tx_id = prev_tx_id;
-        this->output_index = output_index;
-        this->owner = owner;
-    }
-
-    string getprev_tx_id() const { return prev_tx_id; }
-    int getoutput_index() const { return output_index; }
-    string getowner() const { return owner; }
+    tx_input(string id = "", int idx = 0, string own = "") : prev_tx_id(id), index(idx), owner(own) {}
 };
 
 class tx_output
 {
-private:
+public:
     double amount;
-    string receiver;
+    string recipient;
 
-public:
-    tx_output(double amount, const string &receiver)
-    {
-        this->amount = amount;
-        this->receiver = receiver;
-    }
-
-    double getamount() const { return amount; }
-    string getreceiver() const { return receiver; }
+    tx_output(double amt = 0.0, string rec = "") : amount(amt), recipient(rec) {}
 };
 
-class transaction
+class transac
 {
-private:
-    string tx_id;
-    vector<tx_input> inputs;
-    vector<tx_output> outputs;
-
 public:
-    transaction(string tx_id, vector<tx_input> inputs, vector<tx_output> outputs)
+    string tx_id;
+    vector<tx_input> tx_inputs;
+    vector<tx_output> outputs;
+    double fee;
+
+    Transaction(string id = "") : tx_id(id), fee(0.0) {}
+
+    void add_tx_input(string prev_tx_id, int index, string owner)
     {
-        this->tx_id = tx_id;
-        this->inputs = inputs;
-        this->outputs = outputs;
+        tx_inputs.push_back(tx_input(prev_tx_id, index, owner));
     }
 
-    string gettx_id() const { return tx_id; }
-    vector<tx_input> getinputs() const { return inputs; }
-    vector<tx_output> getoutputs() const { return outputs; }
+    void add_output(double amount, string recipient)
+    {
+        outputs.push_back(tx_output(amount, recipient));
+    }
 };
 
-#endif // TRANSACTION_H
+#endif
