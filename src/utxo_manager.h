@@ -94,8 +94,19 @@ public:
     {
         return utxo_set;
     }
-};
 
-using UTXOManager = utxo_manager;
+    vector<pair<utxo_key, utxo_value>> get_utxos_for_owner(string owner)
+    {
+        vector<pair<utxo_key, utxo_value>> result;
+        for (auto const &[key, val] : utxo_set)
+        {
+            if (val.owner == owner)
+            {
+                result.push_back({key, val});
+            }
+        }
+        return result;
+    }
+};
 
 #endif

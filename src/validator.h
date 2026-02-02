@@ -19,7 +19,7 @@ public:
         double input_sum = 0;
         for (auto const &in : tx.getinputs())
         {
-            input_sum += um.get_amount(in.getprev_tx_id(), in.getoutput_index());
+            input_sum += um.get_amount(in.getprev_tx(), in.getoutput_index());
         }
 
         double output_sum = 0;
@@ -48,12 +48,6 @@ inline bool validator::validate_transaction(
     string &error_message,
     double &fee)
 {
-    if (mp.is_full())
-    {
-        error_message = "Mempool is full";
-        return false;
-    }
-
     if (tx.getinputs().empty())
     {
         error_message = "No inputs";
@@ -64,7 +58,7 @@ inline bool validator::validate_transaction(
     double input_sum = 0;
     for (auto const &in : tx.getinputs())
     {
-        utxo_key key(in.getprev_tx_id(), in.getoutput_index());
+        utxo_key key(in.getprev_tx(), in.getoutput_index());
         
         if (seen_inputs.find(key) != seen_inputs.end())
         {
@@ -73,7 +67,7 @@ inline bool validator::validate_transaction(
         }
         seen_inputs.insert(key);
 
-        if (!um.exists(in.getprev_tx_id(), in.getoutput_index()))
+        if (!um.exists(in.getprev_tx(), in.getoutput_index()))
         {
             error_message = "Input UTXO does not exist";
             return false;
@@ -85,21 +79,21 @@ inline bool validator::validate_transaction(
             return false;
         }
 
-        if (um.get_owner(in.getprev_tx_id(), in.getoutput_index()) != in.getowner())
+        if (um.get_owner(in.getprev_tx(), in.getoutput_index()) != in.getowner())
         {
             error_message = "Input UTXO owner mismatch";
             return false;
         }
 
-        input_sum += um.get_amount(in.getprev_tx_id(), in.getoutput_index());
+        input_sum += um.get_amount(in.getprev_tx(), in.getoutput_index());
     }
 
     double output_sum = 0;
     for (auto const &out : tx.getoutputs())
     {
-        if (out.getamount() < 0)
+        if (out.getamount() <= 0)
         {
-            error_message = "Negative output amount";
+            error_message = "Output amount must be positive";
             return false;
         }
         output_sum += out.getamount();
@@ -115,4 +109,4 @@ inline bool validator::validate_transaction(
     return true;
 }
 
-#endif // VALIDATOR_H
+#endif

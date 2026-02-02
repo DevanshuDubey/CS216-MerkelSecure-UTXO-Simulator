@@ -6,13 +6,13 @@
 
 using namespace std;
 
-class Blockchain {
+class blockchain {
 private:
     block* latest_block;
     int height;
 
 public:
-    Blockchain() {
+    blockchain() {
         latest_block = nullptr;
         height = 0;
     }
@@ -39,7 +39,6 @@ public:
                  << " | Fees: " << current->get_total_fees() 
                  << " | TX Count: " << current->get_transactions().size() << endl;
             
-            // Move backward through the chain
             current = current->get_prev_block();
         }
     }

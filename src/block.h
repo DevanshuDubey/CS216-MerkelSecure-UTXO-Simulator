@@ -4,20 +4,19 @@
 #include <vector>
 #include <string>
 #include "transaction.h"
-#include "blockchain.h"
 
 using namespace std;
 
 class block {
 private:
-    block* prevBlock;               
-    string miner_address;           
-    double total_fees;              
-    vector<transaction> transactions; 
+    block* prevBlock;
+    string miner_address;
+    double total_fees;
+    vector<transaction> transactions;
 
 public:
-    block(string miner, double fees, vector<transaction> txs, Blockchain& blockchain) {
-        prevBlock = blockchain.get_latest_block();
+    block(string miner, double fees, vector<transaction> txs, block* prev) {
+        prevBlock = prev;
         miner_address = miner;
         total_fees = fees;
         transactions = txs;

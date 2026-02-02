@@ -6,17 +6,16 @@
 #include <vector>
 #include <string>
 #include <set>
-#include <queue>
 #include <algorithm>
 
 using namespace std;
 
-class validator; // Forward declaration
+class validator;
 
 class mempool
 {
 private:
-    priority_queue<pair<double, transaction>> transactions;
+    vector<transaction> transactions;
     set<utxo_key> spent_utxos;
     int max_size;
 
@@ -37,36 +36,51 @@ public:
 
     vector<transaction> mine_top_transactions(int n)
     {
+        sort(transactions.begin(), transactions.end(), [](const transaction &a, const transaction &b) {
+            return a.fee > b.fee;
+        });
+
         vector<transaction> mined_txs;
-        for (int i = 0; i < n && !transactions.empty(); i++)
-        {
-            transaction tx = transactions.top().second;
-            transactions.pop();
-            mined_txs.push_back(tx);
-            for (auto const &in : tx.inputs)
-            {
-                spent_utxos.erase(utxo_key(in.prev_tx_id, in.index));
+        int to_mine = min((int)transactions.size(), n);
+        
+        for (int i = 0; i < to_mine; i++) {
+            mined_txs.push_back(transactions[i]);
+            for (auto const &in : transactions[i].inputs) {
+                spent_utxos.erase(utxo_key(in.prev_tx, in.index));
             }
         }
+        
+        transactions.erase(transactions.begin(), transactions.begin() + to_mine);
         return mined_txs;
     }
 
     vector<transaction> get_all_transactions()
     {
-        vector<transaction> all_txs;
-        priority_queue<pair<double, transaction>> temp = transactions;
-        while (!temp.empty())
-        {
-            all_txs.push_back(temp.top().second);
-            temp.pop();
-        }
+        vector<transaction> all_txs = transactions;
+        sort(all_txs.begin(), all_txs.end(), [](const transaction &a, const transaction &b) {
+            return a.fee > b.fee;
+        });
         return all_txs;
+    }
+
+    void remove_transaction(string id)
+    {
+        auto it = find_if(transactions.begin(), transactions.end(), [&](const transaction &tx) {
+            return tx.tx_id == id;
+        });
+        if (it != transactions.end())
+        {
+            for (auto const &in : it->inputs)
+            {
+                spent_utxos.erase(utxo_key(in.prev_tx, in.index));
+            }
+            transactions.erase(it);
+        }
     }
 
     void clear()
     {
-        while (!transactions.empty())
-            transactions.pop();
+        transactions.clear();
         spent_utxos.clear();
     }
 };
@@ -83,10 +97,27 @@ pair<bool, string> mempool::add_transaction(transaction tx, utxo_manager &um)
     }
     tx.fee = calculated_fee;
 
-    transactions.push(make_pair(tx.fee, tx));
+    if (is_full()) {
+        // transaction with lowest fee
+        auto min_it = min_element(transactions.begin(), transactions.end(), [](const transaction &a, const transaction &b) {
+            return a.fee < b.fee;
+        });
+
+        if (tx.fee > min_it->fee) {
+            // remove the lowest fee transaction
+            for (auto const &in : min_it->inputs) {
+                spent_utxos.erase(utxo_key(in.prev_tx, in.index));
+            }
+            transactions.erase(min_it);
+        } else {
+            return {false, "Mempool is full and new transaction fee is too low for eviction"};
+        }
+    }
+
+    transactions.push_back(tx);
     for (auto const &in : tx.inputs)
     {
-        spent_utxos.insert(utxo_key(in.prev_tx_id, in.index));
+        spent_utxos.insert(utxo_key(in.prev_tx, in.index));
     }
 
     return {true, "Transaction added to mempool"};
