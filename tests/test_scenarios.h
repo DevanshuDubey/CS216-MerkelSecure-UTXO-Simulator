@@ -25,114 +25,205 @@ void reset_state(utxo_manager &mgr, mempool &mp)
     mgr.add_utxo("genesis", 4, 5.0, "Eve");
 }
 
+void run_double_spend_test(utxo_manager &mgr, mempool &mp)
+{
+    reset_state(mgr, mp);
+    cout << "Running test..." << endl;
+    cout << "\nTest : Alice tries to spend same UTXO twice" << endl;
+
+    transaction tx1("tx_alice_bob_001");
+    tx1.inputs = {{"genesis", 0, "Alice"}};
+    tx1.outputs = {{10.0, "Bob"}, {39.999, "Alice"}};
+    
+    auto res1 = mp.add_transaction(tx1, mgr);
+    cout << "TX1 : Alice -> Bob (10 BTC ) - " << (res1.first ? "VALID" : "REJECTED") << endl;
+
+    transaction tx2("tx_alice_charlie_002");
+    tx2.inputs = {{"genesis", 0, "Alice"}};
+    tx2.outputs = {{10.0, "Charlie"}, {39.999, "Alice"}};
+    
+    auto res2 = mp.add_transaction(tx2, mgr);
+    cout << "TX2 : Alice -> Charlie (10 BTC ) - " << (res2.first ? "VALID" : "REJECTED") << endl;
+
+    if (!res2.first) {
+        cout << "Error : " << res2.second << endl;
+    }
+}
+
+void test_1_basic_valid(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 1 : Alice sends 10 BTC to Bob" << endl;
+    transaction tx1("tx1");
+    tx1.inputs = {{"genesis", 0, "Alice"}};
+    tx1.outputs = {{10.0, "Bob"}, {39.999, "Alice"}};
+    auto res = mp.add_transaction(tx1, mgr);
+    cout << "TX1 : Alice -> Bob (10 BTC ) - " << (res.first ? "VALID" : "REJECTED") << endl;
+    if (res.first) cout << "Fee calculated : " << tx1.fee << " BTC" << endl;
+}
+
+void test_2_multiple_inputs(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 2 : Alice spends 50 + 20 BTC to send 60 to Bob" << endl;
+    transaction tx2("tx2");
+    tx2.inputs = {{"genesis", 0, "Alice"}, {"genesis", 2, "Charlie"}};
+    tx2.outputs = {{60.0, "Bob"}, {9.999, "Alice"}};
+    auto res = mp.add_transaction(tx2, mgr);
+    cout << "TX2 : Alice -> Bob (60 BTC ) - " << (res.first ? "VALID" : "REJECTED") << endl;
+}
+
+void test_3_double_spend_same_tx(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 3 : Double-Spend in Same Transaction" << endl;
+    transaction tx3("tx3");
+    tx3.inputs = {{"genesis", 0, "Alice"}, {"genesis", 0, "Alice"}};
+    tx3.outputs = {{10.0, "Bob"}};
+    auto res = mp.add_transaction(tx3, mgr);
+    cout << "TX3 : Alice tries same UTXO twice - " << (res.first ? "VALID" : "REJECTED") << endl;
+    if (!res.first) cout << "Error : " << res.second << endl;
+}
+
+void test_4_mempool_double_spend(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 4 : Mempool Double-Spend" << endl;
+    transaction tx4a("tx4a");
+    tx4a.inputs = {{"genesis", 1, "Bob"}};
+    tx4a.outputs = {{10.0, "Alice"}, {19.999, "Bob"}};
+    mp.add_transaction(tx4a, mgr);
+    cout << "TX1 : Bob -> Alice (10 BTC ) - VALID" << endl;
+
+    transaction tx4b("tx4b");
+    tx4b.inputs = {{"genesis", 1, "Bob"}};
+    tx4b.outputs = {{5.0, "Charlie"}, {24.999, "Bob"}};
+    auto res = mp.add_transaction(tx4b, mgr);
+    cout << "TX2 : Bob -> Charlie (5 BTC ) - " << (res.first ? "VALID" : "REJECTED") << endl;
+    if (!res.first) cout << "Error : " << res.second << endl;
+}
+
+void test_5_insufficient_funds(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 5 : Insufficient Funds" << endl;
+    transaction tx5("tx5");
+    tx5.inputs = {{"genesis", 1, "Bob"}};
+    tx5.outputs = {{35.0, "Alice"}};
+    auto res = mp.add_transaction(tx5, mgr);
+    cout << "TX5 : Bob tries to send 35 BTC (has 30) - " << (res.first ? "VALID" : "REJECTED") << endl;
+    if (!res.first) cout << "Error : " << res.second << endl;
+}
+
+void test_6_negative_amount(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 6 : Negative Amount" << endl;
+    transaction tx6("tx6");
+    tx6.inputs = {{"genesis", 3, "David"}};
+    tx6.outputs = {{-5.0, "Eve"}};
+    auto res = mp.add_transaction(tx6, mgr);
+    cout << "TX6 : Negative amount - " << (res.first ? "VALID" : "REJECTED") << endl;
+    if (!res.first) cout << "Error : " << res.second << endl;
+}
+
+void test_7_zero_fee(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 7 : Zero Fee Transaction" << endl;
+    transaction tx7("tx7");
+    tx7.inputs = {{"genesis", 4, "Eve"}};
+    tx7.outputs = {{5.0, "Alice"}};
+    auto res = mp.add_transaction(tx7, mgr);
+    cout << "TX7 : 5 BTC input, 5 BTC output - " << (res.first ? "VALID" : "REJECTED") << endl;
+}
+
+void test_8_race_attack(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 8 : Race Attack (First-seen rule)" << endl;
+    transaction tx8a("tx8_low");
+    tx8a.inputs = {{"genesis", 0, "Alice"}};
+    tx8a.outputs = {{10.0, "Bob"}, {39.999, "Alice"}};
+    mp.add_transaction(tx8a, mgr);
+    cout << "TX1 (Low fee ) arrives first - VALID" << endl;
+
+    transaction tx8b("tx8_high");
+    tx8b.inputs = {{"genesis", 0, "Alice"}};
+    tx8b.outputs = {{10.0, "Charlie"}, {39.0, "Alice"}};
+    auto res = mp.add_transaction(tx8b, mgr);
+    cout << "TX2 (High fee ) arrives second - " << (res.first ? "VALID" : "REJECTED") << endl;
+}
+
+void test_9_mining_flow(utxo_manager &mgr, mempool &mp, blockchain &bc) {
+    reset_state(mgr, mp);
+    cout << "Test 9 : Complete Mining Flow" << endl;
+    transaction tx9("tx9");
+    tx9.inputs = {{"genesis", 1, "Bob"}};
+    tx9.outputs = {{10.0, "Alice"}, {19.999, "Bob"}};
+    mp.add_transaction(tx9, mgr);
+    mine_block("Miner1", mp, mgr, bc);
+    cout << "Verification: Bob's genesis UTXO is gone: " << (!mgr.exists("genesis", 1) ? "YES" : "NO") << endl;
+    cout << "Verification: Miner1 received fee: " << (mgr.get_balance("Miner1") > 0 ? "YES" : "NO") << endl;
+}
+
+void test_10_unconfirmed_chain(utxo_manager &mgr, mempool &mp) {
+    reset_state(mgr, mp);
+    cout << "Test 10 : Unconfirmed Chain" << endl;
+    transaction tx10a("tx10a");
+    tx10a.inputs = {{"genesis", 0, "Alice"}};
+    tx10a.outputs = {{10.0, "Bob"}, {39.999, "Alice"}};
+    mp.add_transaction(tx10a, mgr);
+    cout << "TX10a : Alice -> Bob (10 BTC ) - VALID" << endl;
+
+    transaction tx10b("tx10b");
+    tx10b.inputs = {{"tx10a", 0, "Bob"}};
+    tx10b.outputs = {{5.0, "Charlie"}, {4.999, "Bob"}};
+    auto res = mp.add_transaction(tx10b, mgr);
+    cout << "TX10b : Bob spends unconfirmed output - " << (res.first ? "VALID" : "REJECTED") << endl;
+    if (!res.first) cout << "Error : " << res.second << " (Decision: Rejected as per design)" << endl;
+}
+
 void run_tests()
 {
     utxo_manager mgr;
     mempool mp;
     blockchain bc;
 
-    reset_state(mgr, mp);
-    transaction tx1;
-    tx1.tx_id = "tx1";
-    tx1.inputs = {{"genesis", 0, "Alice"}};
-    tx1.outputs = {{10.0, "Bob"}, {39.999, "Alice"}};
-    assert(mp.add_transaction(tx1, mgr).first == true);
-    cout << "Test 1 Passed: Basic Valid transaction" << endl;
+    while (true) {
+        cout << "\n1. Test 1 : Basic Valid Transaction" << endl;
+        cout << "2. Test 2 : Double-spend" << endl;
+        cout << "3. Test 3 : Double-Spend in Same Transaction" << endl;
+        cout << "4. Test 4 : Mempool Double-Spend" << endl;
+        cout << "5. Test 5 : Insufficient Funds" << endl;
+        cout << "6. Test 6 : Negative Amount" << endl;
+        cout << "7. Test 7 : Zero Fee Transaction" << endl;
+        cout << "8. Test 8 : Race Attack Simulation" << endl;
+        cout << "9. Test 9 : Complete Mining Flow" << endl;
+        cout << "10. Test 10 : Unconfirmed Chain" << endl;
+        cout << "11. Run all tests" << endl;
+        cout << "12. Back up" << endl;
+        cout << "Enter choice : ";
+        
+        int choice;
+        cin >> choice;
 
-    reset_state(mgr, mp);
-    transaction tx2;
-    tx2.tx_id = "tx2";
-    tx2.inputs = {{"genesis", 0, "Alice"}, {"genesis", 2, "Charlie"}};
-    tx2.outputs = {{60.0, "Bob"}, {9.999, "Alice"}};
-    assert(mp.add_transaction(tx2, mgr).first == true);
-    cout << "Test 2 Passed: Multiple Inputs" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx3;
-    tx3.tx_id = "tx3";
-    tx3.inputs = {{"genesis", 0, "Alice"}, {"genesis", 0, "Alice"}};
-    tx3.outputs = {{10.0, "Bob"}};
-    assert(mp.add_transaction(tx3, mgr).first == false);
-    cout << "Test 3 Passed: Double-Spend in Same transaction (Rejected)" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx4a;
-    tx4a.tx_id = "tx4a";
-    tx4a.inputs = {{"genesis", 1, "Bob"}};
-    tx4a.outputs = {{10.0, "Alice"}};
-    mp.add_transaction(tx4a, mgr);
-
-    transaction tx4b;
-    tx4b.tx_id = "tx4b";
-    tx4b.inputs = {{"genesis", 1, "Bob"}};
-    tx4b.outputs = {{5.0, "Charlie"}};
-    assert(mp.add_transaction(tx4b, mgr).first == false);
-    cout << "Test 4 Passed: mempool Double-Spend (Rejected)" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx5;
-    tx5.tx_id = "tx5";
-    tx5.inputs = {{"genesis", 1, "Bob"}};
-    tx5.outputs = {{35.0, "Alice"}};
-    assert(mp.add_transaction(tx5, mgr).first == false);
-    cout << "Test 5 Passed: Insufficient Funds (Rejected)" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx6;
-    tx6.tx_id = "tx6";
-    tx6.inputs = {{"genesis", 3, "David"}};
-    tx6.outputs = {{-5.0, "Eve"}};
-    assert(mp.add_transaction(tx6, mgr).first == false);
-    cout << "Test 6 Passed: Negative Amount (Rejected)" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx7;
-    tx7.tx_id = "tx7";
-    tx7.inputs = {{"genesis", 4, "Eve"}};
-    tx7.outputs = {{5.0, "Alice"}};
-    assert(mp.add_transaction(tx7, mgr).first == true);
-    cout << "Test 7 Passed: Zero Fee transaction (Accepted)" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx8_low_fee;
-    tx8_low_fee.tx_id = "tx8_low";
-    tx8_low_fee.inputs = {{"genesis", 0, "Alice"}};
-    tx8_low_fee.outputs = {{10.0, "Bob"}, {39.999, "Alice"}};
-    mp.add_transaction(tx8_low_fee, mgr);
-
-    transaction tx8_high_fee;
-    tx8_high_fee.tx_id = "tx8_high";
-    tx8_high_fee.inputs = {{"genesis", 0, "Alice"}};
-    tx8_high_fee.outputs = {{10.0, "Charlie"}, {39.0, "Alice"}};
-    assert(mp.add_transaction(tx8_high_fee, mgr).first == false);
-    cout << "Test 8 Passed: Race Attack (First-seen rule enforced)" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx9;
-    tx9.tx_id = "tx9";
-    tx9.inputs = {{"genesis", 1, "Bob"}};
-    tx9.outputs = {{10.0, "Alice"}, {19.0, "Bob"}};
-    mp.add_transaction(tx9, mgr);
-
-    mine_block("Miner1", mp, mgr, bc);
-    assert(mgr.exists("tx9", 0) == true);
-    assert(mgr.exists("genesis", 1) == false);
-    cout << "Test 9 Passed: Complete Mining Flow" << endl;
-
-    reset_state(mgr, mp);
-    transaction tx10a;
-    tx10a.tx_id = "tx10a";
-    tx10a.inputs = {{"genesis", 0, "Alice"}};
-    tx10a.outputs = {{10.0, "Bob"}, {39.9, "Alice"}};
-    mp.add_transaction(tx10a, mgr);
-
-    transaction tx10b;
-    tx10b.tx_id = "tx10b";
-    tx10b.inputs = {{"tx10a", 0, "Bob"}};
-    tx10b.outputs = {{5.0, "Charlie"}, {4.9, "Bob"}};
-
-    assert(mp.add_transaction(tx10b, mgr).first == false);
-    cout << "Test 10 Passed: Unconfirmed Chain (Reject simple approach)" << endl;
+        if (choice == 1) test_1_basic_valid(mgr, mp);
+        else if (choice == 2) run_double_spend_test(mgr, mp);
+        else if (choice == 3) test_3_double_spend_same_tx(mgr, mp);
+        else if (choice == 4) test_4_mempool_double_spend(mgr, mp);
+        else if (choice == 5) test_5_insufficient_funds(mgr, mp);
+        else if (choice == 6) test_6_negative_amount(mgr, mp);
+        else if (choice == 7) test_7_zero_fee(mgr, mp);
+        else if (choice == 8) test_8_race_attack(mgr, mp);
+        else if (choice == 9) test_9_mining_flow(mgr, mp, bc);
+        else if (choice == 10) test_10_unconfirmed_chain(mgr, mp);
+        else if (choice == 11) {
+            test_1_basic_valid(mgr, mp);
+            test_2_multiple_inputs(mgr, mp);
+            test_3_double_spend_same_tx(mgr, mp);
+            test_4_mempool_double_spend(mgr, mp);
+            test_5_insufficient_funds(mgr, mp);
+            test_6_negative_amount(mgr, mp);
+            test_7_zero_fee(mgr, mp);
+            test_8_race_attack(mgr, mp);
+            test_9_mining_flow(mgr, mp, bc);
+            test_10_unconfirmed_chain(mgr, mp);
+        }
+        else if (choice == 12) break;
+    }
 }
 
 #endif

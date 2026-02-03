@@ -21,7 +21,7 @@ void display_menu()
     cout << "4. Mine block" << endl;
     cout << "5. Run test scenarios" << endl;
     cout << "6. Exit" << endl;
-    cout << "Enter choice: ";
+    cout << "Enter choice : ";
 }
 
 void initialize_genesis(utxo_manager &um)
@@ -60,7 +60,7 @@ int main()
             double amount;
             cout << "Enter sender : ";
             cin >> sender;
-
+            
             double balance = um.get_balance(sender);
             cout << "Available balance : " << balance << " BTC" << endl;
 
@@ -74,6 +74,8 @@ int main()
             cin >> address;
             cout << "Enter amount : ";
             cin >> amount;
+
+            cout << "\nCreating transaction ..." << endl;
 
             double default_fee = 0.001;
             if (balance < (amount + default_fee))
@@ -114,28 +116,17 @@ int main()
             cout << "Change:    " << (change > 0 ? change : 0) << " BTC" << endl;
             cout << "Auto Fee:  " << fee << " BTC" << endl;
             cout << "---------------------------" << endl;
-            cout << "Confirm transaction? (y/n): ";
-            char confirm;
-            cin >> confirm;
-
-            if (confirm == 'y' || confirm == 'Y')
+            auto result = mp.add_transaction(tx, um);
+            if (result.first)
             {
-                auto result = mp.add_transaction(tx, um);
-                if (result.first)
-                {
-                    cout << "Transaction valid! Fee: " << tx.fee << " BTC" << endl;
-                    cout << "Transaction ID: " << tx.tx_id << endl;
-                    cout << "Transaction added to mempool." << endl;
-                    cout << "Mempool now has " << mp.get_all_transactions().size() << " transactions." << endl;
-                }
-                else
-                {
-                    cout << "Error: " << result.second << endl;
-                }
+                cout << "Transaction valid ! Fee : " << tx.fee << " BTC" << endl;
+                cout << "Transaction ID : " << tx.tx_id << endl;
+                cout << "Transaction added to mempool ." << endl;
+                cout << "Mempool now has " << mp.get_all_transactions().size() << " transactions ." << endl;
             }
             else
             {
-                cout << "Transaction cancelled." << endl;
+                cout << "Error : " << result.second << endl;
             }
         }
         else if (choice == 2)
@@ -161,13 +152,13 @@ int main()
         else if (choice == 4)
         {
             string miner;
-            cout << "Enter miner name: ";
+            cout << "Enter miner name : ";
             cin >> miner;
             mine_block(miner, mp, um, chain);
         }
         else if (choice == 5)
         {
-            cout << "\n--- Running Test Scenarios ---" << endl;
+            cout << "\nSelect test scenario : ";
             run_tests();
         }
         else if (choice == 6)

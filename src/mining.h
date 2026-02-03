@@ -21,7 +21,7 @@ void mine_block(string miner_name, mempool& mp, utxo_manager& um, blockchain& ch
         return;
     }
 
-    cout << "Mining block..." << endl;
+    cout << "Mining block ..." << endl;
     vector<transaction> mempool_txs = mp.mine_top_transactions(num_txs);
 
     double total_fees = 0;
@@ -29,8 +29,8 @@ void mine_block(string miner_name, mempool& mp, utxo_manager& um, blockchain& ch
         total_fees += tx.fee;
     }
 
-    cout << "Selected " << mempool_txs.size() << " transactions from mempool." << endl;
-    cout << "Total fees: " << total_fees << " BTC" << endl;
+    cout << "Selected " << mempool_txs.size() << " transactions from mempool ." << endl;
+    cout << "Total fees : " << total_fees << " BTC" << endl;
     cout << "Miner " << miner_name << " receives " << total_fees << " BTC" << endl;
 
     string coinbase_id = "CB-" + miner_name + "-" + to_string(time(0));
@@ -51,7 +51,7 @@ void mine_block(string miner_name, mempool& mp, utxo_manager& um, blockchain& ch
             um.remove_utxo(input.prev_tx, input.index);
         }
 
-        for (int i = 0; i < tx.outputs.size(); i++) {
+        for (int i = 0; i < (int)tx.outputs.size(); i++) {
             um.add_utxo(tx.tx_id, i, tx.outputs[i].amount, tx.outputs[i].address);
         }
     }
@@ -59,8 +59,8 @@ void mine_block(string miner_name, mempool& mp, utxo_manager& um, blockchain& ch
     block* new_mined_block = new block(miner_name, total_fees, final_block_txs, chain.get_latest_block());
     chain.add_block(new_mined_block);
 
-    cout << "Block mined successfully!" << endl;
-    cout << "Removed " << mempool_txs.size() << " transactions from mempool." << endl;
+    cout << "Block mined successfully !" << endl;
+    cout << "Removed " << mempool_txs.size() << " transactions from mempool ." << endl;
 }
 
 #endif

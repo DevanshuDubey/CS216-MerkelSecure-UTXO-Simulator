@@ -16,7 +16,7 @@ class mempool
 {
 private:
     vector<transaction> transactions;
-    set<utxo_key> spent_utxos;
+    map<utxo_key, string> spent_utxos;
     int max_size;
 
 public:
@@ -24,7 +24,17 @@ public:
 
     bool is_spent(const utxo_key &key) const
     {
-        return spent_utxos.find(key) != spent_utxos.end();
+        return spent_utxos.count(key) > 0;
+    }
+
+    string get_spending_tx(const utxo_key &key) const
+    {
+        auto it = spent_utxos.find(key);
+        if (it != spent_utxos.end())
+        {
+            return it->second;
+        }
+        return "";
     }
 
     bool is_full() const
@@ -32,7 +42,7 @@ public:
         return transactions.size() >= (size_t)max_size;
     }
 
-    pair<bool, string> add_transaction(transaction tx, utxo_manager &um);
+    pair<bool, string> add_transaction(transaction &tx, utxo_manager &um);
 
     vector<transaction> mine_top_transactions(int n)
     {
@@ -62,6 +72,7 @@ public:
         });
         return all_txs;
     }
+    
 
     void remove_transaction(string id)
     {
@@ -87,7 +98,7 @@ public:
 
 #include "validator.h"
 
-pair<bool, string> mempool::add_transaction(transaction tx, utxo_manager &um)
+pair<bool, string> mempool::add_transaction(transaction &tx, utxo_manager &um)
 {
     string error_message;
     double calculated_fee = 0;
@@ -117,7 +128,7 @@ pair<bool, string> mempool::add_transaction(transaction tx, utxo_manager &um)
     transactions.push_back(tx);
     for (auto const &in : tx.inputs)
     {
-        spent_utxos.insert(utxo_key(in.prev_tx, in.index));
+        spent_utxos[utxo_key(in.prev_tx, in.index)] = tx.tx_id;
     }
 
     return {true, "Transaction added to mempool"};
