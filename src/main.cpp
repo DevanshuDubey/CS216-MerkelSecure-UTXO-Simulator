@@ -57,64 +57,83 @@ int main()
         if (choice == 1)
         {
             string sender, address;
-            double amount;
+            double amount, change, send;
             cout << "Enter sender : ";
             cin >> sender;
 
             double balance = um.get_balance(sender);
             cout << "Available balance : " << balance << " BTC" << endl;
-
+            set<int> st;
             if (balance <= 0)
             {
                 cout << "Error: Sender has no balance." << endl;
                 continue;
             }
+            else
+            {
+
+                cout << "Select the input utxos by their index. Enter 0 when you finish selecting." << endl;
+                um.show_utxos(sender);
+                int idx;
+
+                do
+                {
+                    cin >> idx;
+                    if (idx != 0)
+                        st.insert(idx - 1);
+
+                } while (idx != 0);
+            }
+            transaction tx("tx_" + to_string(time(0)));
+
+            for (auto const &[key, val] : um.utxo_set)
+            {
+                
+                if (st.find(key.index) == st.end())
+                    continue;
+
+                
+                if (val.owner != sender)
+                    continue;
+
+                tx.add_input(key.tx_id, key.index, sender);
+                amount += val.amount;
+            }
 
             cout << "Enter recipient : ";
             cin >> address;
-            cout << "Enter amount : ";
-            cin >> amount;
+            cout << "Enter amount to send: ";
+            cin >> send;
+            cout << "Enter change:";
+            cin >> change;
 
-            double default_fee = 0.001;
-            if (balance < (amount + default_fee))
+            if (change > amount)
             {
-                cout << "Error: Insufficient funds for amount + " << default_fee << " fee." << endl;
+                cout << "Error: Insufficient funds." << endl;
                 continue;
             }
 
-            transaction tx("tx_" + to_string(time(0)));
             auto utxos = um.get_utxo_set();
             double total_input = 0;
 
-            for (auto const &[key, val] : utxos)
-            {
-                if (val.owner == sender)
-                {
-                    tx.add_input(key.tx_id, key.index, sender);
-                    total_input += val.amount;
-                    if (total_input >= amount + default_fee)
-                        break;
-                }
-            }
-
-            tx.add_output(amount, address);
-
-            double change = total_input - amount - default_fee;
+            // Main payment output
+            tx.add_output(send, address);
+    
             if (change > 0)
             {
                 tx.add_output(change, sender);
             }
 
-            double fee = validator::calculate_fee(tx, um);
-
             cout << "\n--- Transaction Summary ---" << endl;
             cout << "Sender:    " << sender << endl;
             cout << "Recipient: " << address << endl;
-            cout << "Amount:    " << amount << " BTC" << endl;
-            cout << "Change:    " << (change > 0 ? change : 0) << " BTC" << endl;
-            cout << "Auto Fee:  " << fee << " BTC" << endl;
+            cout << "UTXO Amount Used:    " << amount << " BTC" << endl;
+            cout << "Amount Sent    " << send << " BTC" <<endl;
+            cout << "Change:    " << change << " BTC" << endl;
+            cout << "Fee:       " << amount - change - send << " BTC" << endl;
             cout << "---------------------------" << endl;
             cout << "Confirm transaction? (y/n): ";
+
             char confirm;
             cin >> confirm;
 
@@ -126,7 +145,9 @@ int main()
                     cout << "Transaction valid! Fee: " << tx.fee << " BTC" << endl;
                     cout << "Transaction ID: " << tx.tx_id << endl;
                     cout << "Transaction added to mempool." << endl;
-                    cout << "Mempool now has " << mp.get_all_transactions().size() << " transactions." << endl;
+                    cout << "Mempool now has "
+                         << mp.get_all_transactions().size()
+                         << " transactions." << endl;
                 }
                 else
                 {
@@ -161,9 +182,12 @@ int main()
         else if (choice == 4)
         {
             string miner;
+            int num;
             cout << "Enter miner name: ";
             cin >> miner;
-            mine_block(miner, mp, um, chain);
+            cout << "Enter number of blocks to mine: ";
+            cin >> num;
+            mine_block(miner, mp, um, chain, num);
         }
         else if (choice == 5)
         {

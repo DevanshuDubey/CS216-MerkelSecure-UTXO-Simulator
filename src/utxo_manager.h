@@ -41,10 +41,10 @@ public:
 
 class utxo_manager
 {
-private:
+ 
+    
+    public:
     map<utxo_key, utxo_value> utxo_set;
-
-public:
     void add_utxo(string tx_id, int index, double amount, string owner)
     {
         utxo_set[utxo_key(tx_id, index)] = utxo_value(amount, owner);
@@ -88,6 +88,15 @@ public:
             }
         }
         return balance;
+    }
+
+    void show_utxos(string owner)
+    {
+        for (auto const &[key, val] : utxo_set)
+        {
+            if(val.owner == owner)
+            cout<<key.index + 1<<". "<<val.amount<<" BTC"<<endl;
+        }
     }
 
     map<utxo_key, utxo_value> get_utxo_set()
