@@ -33,8 +33,7 @@ void mine_block(string miner_name, mempool& mp, utxo_manager& um, blockchain& ch
     cout << "Total fees : " << total_fees << " BTC" << endl;
     cout << "Miner " << miner_name << " receives " << total_fees << " BTC" << endl;
 
-    string coinbase_id = "CB-" + miner_name + "-" + to_string(time(0));
-    transaction coinbase_tx(coinbase_id);
+    transaction coinbase_tx("tx_" + to_string(time(0)));
     if (total_fees > 0) {
         coinbase_tx.add_output(total_fees, miner_name);
     }
