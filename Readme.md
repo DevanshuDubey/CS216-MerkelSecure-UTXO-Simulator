@@ -10,10 +10,10 @@
         <li><strong>Team Name</strong>: Merkel Secure</li>
         <li><strong>Members</strong>:
             <ul>
-                <li><strong>Devanshu Dubey</strong> (Roll No: 240001024)</li>
-                <li><strong>Abhinav Patel</strong> (Roll No: 240001004)</li>
-                <li><strong>Pratyush Gupta</strong> (Roll No: 240001054)</li>
-                <li><strong>Abhay Lodhi</strong> (Roll No: 240001003)</li>
+                <li><strong>Devanshu Dubey</strong> (Roll No: 240001024 )</li>
+                <li><strong>Abhinav Patel</strong> (Roll No: 240001004 )</li>
+                <li><strong>Pratyush Gupta</strong> (Roll No: 240001054 )</li>
+                <li><strong>Abhay Lodhi</strong> (Roll No: 240001003 )</li>
             </ul>
         </li>
     </ul>
