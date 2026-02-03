@@ -5,7 +5,7 @@
 
 <hr>
 
-<h2>👥 Team Information</h2>
+<h2>Team Information</h2>
     <ul>
         <li><strong>Team Name</strong>: Merkel Secure</li>
         <li><strong>Members</strong>:
@@ -47,7 +47,7 @@
             <pre><code>cd CS216-TeamMerkelSecure-UTXO-Simulator</code></pre>
         </li>
         <li>Compile the source code:
-            <pre><code>g++ -o utxo_sim src/main.cpp</code></pre>
+            <pre><code>g++ -Isrc src/main.cpp -o utxo_sim</code></pre>            
         </li>
         <li>Execute the simulator:
             <pre><code>./utxo_sim</code></pre>
@@ -56,7 +56,7 @@
 
 <hr>
 
-<h2>📁 Project Structure</h2>
+<h2>Project Structure</h2>
     <pre><code>your-repository/
 ├── src/
 │   ├── main.cpp        # Entry point and Menu Interface
@@ -73,12 +73,12 @@
 
 <hr>
 
-<h2>📋 Features & Requirements Met</h2>
+<h2>Features & Requirements Met</h2>
     <ul>
-        <li>✅ <strong>UTXO Manager</strong>: Dictionary-based lookup for spendable coins.</li>
-        <li>✅ <strong>Fee Logic</strong>: Automatic fee calculation (Input - Output) and priority sorting.</li>
-        <li>✅ <strong>Double-Spend Protection</strong>: Detection in both the Mempool and the permanent UTXO set.</li>
-        <li>✅ <strong>Mining Simulation</strong>: Selection of top transactions and coinbase fee rewards.</li>
+        <li><strong>UTXO Manager</strong>: Dictionary-based lookup for spendable coins.</li>
+        <li><strong>Fee Logic</strong>: Automatic fee calculation (Input - Output) and priority sorting.</li>
+        <li><strong>Double-Spend Protection</strong>: Detection in both the Mempool and the permanent UTXO set.</li>
+        <li><strong>Mining Simulation</strong>: Selection of top transactions and coinbase fee rewards.</li>
         <li>✅ <strong>Linked Blockchain</strong>: Blocks linked via pointers to simulate the chain tip.</li>
     </ul>
 
