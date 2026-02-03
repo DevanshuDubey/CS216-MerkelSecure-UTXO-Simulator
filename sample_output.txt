@@ -1,0 +1,175 @@
+=== Bitcoin Transaction Simulator ===
+Initial UTXOs (Genesis Block):
+- Alice: 50.0 BTC
+- Bob: 30.0 BTC
+- Charlie: 20.0 BTC
+- David: 10.0 BTC
+- Eve: 5.0 BTC
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : 
+1. Test 1 : Basic Valid Transaction
+2. Test 2 : Double-spend
+3. Test 3 : Double-Spend in Same Transaction
+4. Test 4 : Mempool Double-Spend
+5. Test 5 : Insufficient Funds
+6. Test 6 : Negative Amount
+7. Test 7 : Zero Fee Transaction
+8. Test 8 : Race Attack Simulation
+9. Test 9 : Complete Mining Flow
+10. Test 10 : Unconfirmed Chain
+11. Run all tests
+12. Back up
+Enter choice : Test 1 : Alice sends 10 BTC to Bob
+TX1 : Alice -> Bob (10 BTC ) - VALID
+Fee calculated : 0.001 BTC
+Running test...
+
+Test : Alice tries to spend same UTXO twice
+TX1 : Alice -> Bob (10 BTC ) - VALID
+TX2 : Alice -> Charlie (10 BTC ) - REJECTED
+Error : UTXO genesis :0 already spent by tx_alice_bob_001
+Test 3 : Double-Spend in Same Transaction
+TX3 : Alice tries same UTXO twice - REJECTED
+Error : Duplicate input in transaction
+Test 4 : Mempool Double-Spend
+TX1 : Bob -> Alice (10 BTC ) - VALID
+TX2 : Bob -> Charlie (5 BTC ) - REJECTED
+Error : UTXO genesis :1 already spent by tx4a
+Test 5 : Insufficient Funds
+TX5 : Bob tries to send 35 BTC (has 30) - REJECTED
+Error : Insufficient funds
+Test 6 : Negative Amount
+TX6 : Negative amount - REJECTED
+Error : Output amount must be positive
+Test 7 : Zero Fee Transaction
+TX7 : 5 BTC input, 5 BTC output - VALID
+Test 8 : Race Attack (First-seen rule)
+TX1 (Low fee ) : arrives first - VALID
+TX2 (High fee ) : arrives second - REJECTED
+Error : UTXO genesis :0 already spent by tx8_low
+Test 9 : Complete Mining Flow
+Mining block ...
+Selected 1 transactions from mempool .
+Total fees : 0.001 BTC
+Miner Miner1 receives 0.001 BTC
+Block mined successfully !
+Removed 1 transactions from mempool .
+Verification: Bob's genesis UTXO is gone: YES
+Verification: Miner1 received fee: YES
+Test 10 : Unconfirmed Chain
+TX10a : Alice -> Bob (10 BTC ) - VALID
+TX10b : Bob spends unconfirmed output - REJECTED
+Error : Input UTXO does not exist
+ (Decision : Rejected as per design)
+
+1. Test 1 : Basic Valid Transaction
+2. Test 2 : Double-spend
+3. Test 3 : Double-Spend in Same Transaction
+4. Test 4 : Mempool Double-Spend
+5. Test 5 : Insufficient Funds
+6. Test 6 : Negative Amount
+7. Test 7 : Zero Fee Transaction
+8. Test 8 : Race Attack Simulation
+9. Test 9 : Complete Mining Flow
+10. Test 10 : Unconfirmed Chain
+11. Run all tests
+12. Back up
+Enter choice : 
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : 
+--- Current UTXO Set ---
+TX: genesis [0] | Amount: 50 | Owner: Alice
+TX: genesis [1] | Amount: 30 | Owner: Bob
+TX: genesis [2] | Amount: 20 | Owner: Charlie
+TX: genesis [3] | Amount: 10 | Owner: David
+TX: genesis [4] | Amount: 5 | Owner: Eve
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : Enter sender : Available balance : 50 BTC
+Select the input utxos by their index. Enter 0 when you finish selecting.
+1. Amount: 50 BTC
+Enter recipient : Enter amount : Enter change : 
+Creating transaction ...
+Confirm transaction ? (y/n) : Transaction valid ! Fee : 0.5 BTC
+Transaction ID : tx_1770129139
+Transaction added to mempool .
+Mempool now has 1 transactions .
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : 
+--- Current Mempool (Sorted by Fee) ---
+ID: tx_1770129139 | Fee: 0.5 BTC
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : Enter miner name: Mining block ...
+Selected 1 transactions from mempool .
+Total fees : 0.5 BTC
+Miner Miner1 receives 0.5 BTC
+Block mined successfully !
+Removed 1 transactions from mempool .
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : 
+--- Current UTXO Set ---
+TX: genesis [1] | Amount: 30 | Owner: Bob
+TX: genesis [2] | Amount: 20 | Owner: Charlie
+TX: genesis [3] | Amount: 10 | Owner: David
+TX: genesis [4] | Amount: 5 | Owner: Eve
+TX: tx_1770129139 [0] | Amount: 10 | Owner: Bob
+TX: tx_1770129139 [1] | Amount: 39.5 | Owner: Alice
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : --- Blockchain Ledger (Linked List) ---
+Miner: Miner1 | Fees: 0.5 | TX Count: 2
+
+Main Menu:
+1. Create new transaction
+2. View UTXO set
+3. View mempool
+4. Mine block
+5. Run test scenarios
+6. Exit
+Enter choice : 
