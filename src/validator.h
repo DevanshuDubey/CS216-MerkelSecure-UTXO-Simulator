@@ -75,7 +75,7 @@ inline bool validator::validate_transaction(
 
         if (mp.is_spent(key))
         {
-            error_message = "UTXO " + in.getprev_tx() + ":" + to_string(in.getoutput_index()) + " already spent by " + mp.get_spending_tx(key);
+            error_message = "UTXO " + in.getprev_tx() + " :" + to_string(in.getoutput_index()) + " already spent by " + mp.get_spending_tx(key);
             return false;
         }
 
