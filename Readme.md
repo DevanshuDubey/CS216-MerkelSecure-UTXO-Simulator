@@ -1,16 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body>
 
-    <h1>Team Merkel Secure: Bitcoin UTXO Simulator</h1>
+
+<h1>Team Merkel Secure: Bitcoin UTXO Simulator</h1>
     <p>This project is a high-fidelity <strong>Bitcoin Transaction & UTXO Simulator</strong> developed for the <strong>CS 216: Introduction to Blockchain</strong> coding assignment. It simulates the core mechanisms of the Bitcoin ledger, including UTXO management, transaction validation, and the mining lifecycle.</p>
 
-    <hr>
+<hr>
 
-    <h2>👥 Team Information</h2>
+<h2>👥 Team Information</h2>
     <ul>
         <li><strong>Team Name</strong>: Merkel Secure</li>
         <li><strong>Members</strong>:
@@ -23,12 +18,12 @@
         </li>
     </ul>
 
-    <hr>
+<hr>
 
-    <h2>🛠️ Design Explanation</h2>
+<h2>🛠️ Design Explanation</h2>
     <p>The simulator is architected to mirror the decentralized logic of a blockchain node using Object-Oriented Programming (OOP) in C++.</p>
 
-    <h3>Core Architecture</h3>
+<h3>Core Architecture</h3>
     <ol>
         <li><strong>UTXO Model</strong>: Instead of an account-based system, we track "Unspent Transaction Outputs". Each transaction consumes existing UTXOs as inputs and creates new ones as outputs.</li>
         <li><strong>Modular Validation</strong>: A standalone <code>validator</code> class enforces consensus rules. It checks for double-spending, non-existent inputs, and ensures that the sum of inputs covers the outputs and fees.</li>
@@ -37,16 +32,16 @@
         <li><strong>Double-Spend Prevention</strong>: We use a "first-seen" rule. A <code>spent_utxos</code> set in the mempool locks inputs immediately, rejecting any subsequent conflicting transactions.</li>
     </ol>
 
-    <hr>
+<hr>
 
-    <h2>🚀 How to Run</h2>
+<h2>🚀 How to Run</h2>
     <h3>Prerequisites</h3>
     <ul>
         <li>A C++ compiler supporting C++11 or higher (GCC/G++, Clang, or MSVC).</li>
         <li>Standard Template Library (STL) — No external blockchain libraries were used.</li>
     </ul>
 
-    <h3>Build Instructions</h3>
+<h3>Build Instructions</h3>
     <ol>
         <li>Navigate to the project directory:
             <pre><code>cd CS216-TeamMerkelSecure-UTXO-Simulator</code></pre>
@@ -59,9 +54,9 @@
         </li>
     </ol>
 
-    <hr>
+<hr>
 
-    <h2>📁 Project Structure</h2>
+<h2>📁 Project Structure</h2>
     <pre><code>your-repository/
 ├── src/
 │   ├── main.cpp        # Entry point and Menu Interface
@@ -75,9 +70,9 @@
 │   └── scenarios.cpp   # Automated mandatory test cases
 └── README.md           # Project documentation</code></pre>
 
-    <hr>
+<hr>
 
-    <h2>📋 Features & Requirements Met</h2>
+<h2>📋 Features & Requirements Met</h2>
     <ul>
         <li>✅ <strong>UTXO Manager</strong>: Dictionary-based lookup for spendable coins.</li>
         <li>✅ <strong>Fee Logic</strong>: Automatic fee calculation (Input - Output) and priority sorting.</li>
@@ -86,5 +81,3 @@
         <li>✅ <strong>Linked Blockchain</strong>: Blocks linked via pointers to simulate the chain tip.</li>
     </ul>
 
-</body>
-</html>
