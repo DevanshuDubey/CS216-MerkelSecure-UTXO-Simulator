@@ -64,10 +64,11 @@
 │   ├── transaction.h   # Transaction, Input, and Output classes
 │   ├── mempool.h       # Priority-based pending storage
 │   ├── validator.h     # Consensus rule enforcement
+    ├── mining.h        # Mining Logic for creating new block
 │   ├── block.h         # Linked-list block node structure
 │   └── blockchain.h    # Manager for the chain of blocks
 ├── tests/
-│   └── scenarios.cpp   # Automated mandatory test cases
+│   └── test_scenarios.cpp   # Automated mandatory test cases
 └── README.md           # Project documentation</code></pre>
 
 <hr>
