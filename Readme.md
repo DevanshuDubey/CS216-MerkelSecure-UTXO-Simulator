@@ -79,6 +79,6 @@
         <li><strong>Fee Logic</strong>: Automatic fee calculation (Input - Output) and priority sorting.</li>
         <li><strong>Double-Spend Protection</strong>: Detection in both the Mempool and the permanent UTXO set.</li>
         <li><strong>Mining Simulation</strong>: Selection of top transactions and coinbase fee rewards.</li>
-        <li>✅ <strong>Linked Blockchain</strong>: Blocks linked via pointers to simulate the chain tip.</li>
+        <li><strong>Linked Blockchain</strong>: Blocks linked via pointers to simulate the chain tip.</li>
     </ul>
 
