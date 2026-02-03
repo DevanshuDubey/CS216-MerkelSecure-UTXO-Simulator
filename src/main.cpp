@@ -57,13 +57,14 @@ int main()
         if (choice == 1)
         {
             string sender, address;
-            double amount, change, send;
+            double amount = 0.0, change = 0.0, send = 0.0;
             cout << "Enter sender : ";
             cin >> sender;
 
             double balance = um.get_balance(sender);
             cout << "Available balance : " << balance << " BTC" << endl;
-            set<int> st;
+            set<utxo_key> st;
+            map<int, utxo_key> mpidx;
             if (balance <= 0)
             {
                 cout << "Error: Sender has no balance." << endl;
@@ -73,26 +74,40 @@ int main()
             {
 
                 cout << "Select the input utxos by their index. Enter 0 when you finish selecting." << endl;
-                um.show_utxos(sender);
+                mpidx = um.show_utxos(sender);
                 int idx;
 
                 do
                 {
                     cin >> idx;
                     if (idx != 0)
-                        st.insert(idx - 1);
+                    {
+                        if (mpidx.find(idx) == mpidx.end())
+                        {
+                            cout << "Invalid index. Try again." << endl;
+                            continue;
+                        }
+                        st.insert(mpidx[idx]);
+                    }
 
                 } while (idx != 0);
             }
+
+            if (st.empty())
+            {
+                cout << "No UTXOs selected. Transaction aborted." << endl;
+                continue;
+            }
             transaction tx("tx_" + to_string(time(0)));
 
-            for (auto const &[key, val] : um.utxo_set)
+            for (const auto &key : st)
             {
-                
-                if (st.find(key.index) == st.end())
+                auto it = um.utxo_set.find(key);
+                if (it == um.utxo_set.end())
                     continue;
 
-                
+                const auto &val = it->second;
+
                 if (val.owner != sender)
                     continue;
 
@@ -118,7 +133,7 @@ int main()
 
             // Main payment output
             tx.add_output(send, address);
-    
+
             if (change > 0)
             {
                 tx.add_output(change, sender);
@@ -128,7 +143,7 @@ int main()
             cout << "Sender:    " << sender << endl;
             cout << "Recipient: " << address << endl;
             cout << "UTXO Amount Used:    " << amount << " BTC" << endl;
-            cout << "Amount Sent    " << send << " BTC" <<endl;
+            cout << "Amount Sent    " << send << " BTC" << endl;
             cout << "Change:    " << change << " BTC" << endl;
             cout << "Fee:       " << amount - change - send << " BTC" << endl;
             cout << "---------------------------" << endl;
@@ -185,7 +200,7 @@ int main()
             int num;
             cout << "Enter miner name: ";
             cin >> miner;
-            cout << "Enter number of blocks to mine: ";
+            cout << "Enter number of transactions to mine: ";
             cin >> num;
             mine_block(miner, mp, um, chain, num);
         }
